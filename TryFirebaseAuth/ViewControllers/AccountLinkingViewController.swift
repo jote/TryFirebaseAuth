@@ -29,7 +29,6 @@ import CryptoKit
 
 class AccountLinkingViewController: UIViewController, DataSourceProviderDelegate {
     var dataSourceProvider: DataSourceProvider<AuthProvider>!
-
     var tableView: UITableView { view as! UITableView }
 
     override func loadView() {
@@ -38,8 +37,8 @@ class AccountLinkingViewController: UIViewController, DataSourceProviderDelegate
 
     let user: User
 
-    /// Designated initializer requires a valid, non-nil Firebase user.
-    /// - Parameter user: An instance of a Firebase `User`.
+        /// Designated initializer requires a valid, non-nil Firebase user.
+        /// - Parameter user: An instance of a Firebase `User`.
     init(for user: User) {
         self.user = user
         super.init(nibName: nil, bundle: nil)
@@ -59,146 +58,132 @@ class AccountLinkingViewController: UIViewController, DataSourceProviderDelegate
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // TODO: 描画できているか確認
-        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.systemOrange]
+        navigationController?.setTitleColor(.systemOrange)
     }
 
-    // MARK: - DataSourceProviderDelegate
+        // MARK: - DataSourceProviderDelegate
 
     func didSelectRowAt(_ indexPath: IndexPath, on tableView: UITableView) {
-    let item = dataSourceProvider.item(at: indexPath)
+        let item = dataSourceProvider.item(at: indexPath)
+        let providerName = item.title!
+        guard let provider = AuthProvider(rawValue: providerName) else {
+                // The row tapped has no affiliated action.
+            return
+        }
+            // If the item's affiliated provider is currently linked with the user,
+            // unlink the provider from the user's account.
+        if item.isChecked {
+            unlinkFromProvider(provider.id)
+            return
+        }
 
-    let providerName = item.title!
-
-    guard let provider = AuthProvider(rawValue: providerName) else {
-      // The row tapped has no affiliated action.
-      return
+        switch provider {
+            case .google:
+                performGoogleAccountLink()
+            case .apple:
+                performAppleAccountLink()
+            case .facebook:
+                performFacebookAccountLink()
+            case .twitter, .microsoft, .gitHub, .yahoo:
+                performOAuthAccountLink(for: provider)
+            case .emailPassword:
+                performEmailPasswordAccountLink()
+            case .passwordless:
+                performPasswordlessAccountLink()
+            case .phoneNumber:
+                performPhoneNumberAccountLink()
+            default:
+                break
+        }
     }
 
-    // If the item's affiliated provider is currently linked with the user,
-    // unlink the provider from the user's account.
-    if item.isChecked {
-      unlinkFromProvider(provider.id)
-      return
-    }
+    // MARK: Firebase 🔥
 
-    switch provider {
-    case .google:
-      performGoogleAccountLink()
-
-    case .apple:
-      performAppleAccountLink()
-
-    case .facebook:
-      performFacebookAccountLink()
-
-    case .twitter, .microsoft, .gitHub, .yahoo:
-      performOAuthAccountLink(for: provider)
-
-    case .emailPassword:
-      performEmailPasswordAccountLink()
-
-    case .passwordless:
-      performPasswordlessAccountLink()
-
-    case .phoneNumber:
-      performPhoneNumberAccountLink()
-
-    default:
-      break
-    }
-  }
-
-  // MARK: Firebase 🔥
-
-  /// Wrapper method that uses Firebase's `link(with:)` API to link a user to another auth provider.
-  /// Used when linking a user to each of the following auth providers.
-  /// This method will update the UI upon the linking's completion.
-  /// - Parameter authCredential: The credential used to link the user with the auth provider.
-  private func linkAccount(authCredential: AuthCredential) {
+    /// Wrapper method that uses Firebase's `link(with:)` API to link a user to another auth provider.
+    /// Used when linking a user to each of the following auth providers.
+    /// This method will update the UI upon the linking's completion.
+    /// - Parameter authCredential: The credential used to link the user with the auth provider.
+    private func linkAccount(authCredential: AuthCredential) {
     user.link(with: authCredential) { result, error in
-      guard error == nil else { return self.displayError(error) }
-      self.updateUI()
+            guard error == nil else { return self.displayError(error) }
+            self.updateUI()
+        }
     }
-  }
 
-  /// Wrapper method that uses Firebase's `unlink(fromProvider:)` API to unlink a user from an auth provider.
-  /// This method will update the UI upon the unlinking's completion.
-  /// - Parameter providerID: The string id of the auth provider.
-  private func unlinkFromProvider(_ providerID: String) {
-    user.unlink(fromProvider: providerID) { user, error in
-      guard error == nil else { return self.displayError(error) }
-      print("Unlinked user from auth provider: \(providerID)")
-      self.updateUI()
+    /// Wrapper method that uses Firebase's `unlink(fromProvider:)` API to unlink a user from an auth provider.
+    /// This method will update the UI upon the unlinking's completion.
+    /// - Parameter providerID: The string id of the auth provider.
+    private func unlinkFromProvider(_ providerID: String) {
+        user.unlink(fromProvider: providerID) { user, error in
+            guard error == nil else { return self.displayError(error) }
+            print("Unlinked user from auth provider: \(providerID)")
+            self.updateUI()
+        }
     }
-  }
 
-  // MARK: - Sign in with Google Account Linking 🔥
+    // MARK: - Sign in with Google Account Linking 🔥
 
   /// This method will initate the Google Sign In flow.
   /// See this class's conformance to `GIDSignInDelegate` below for
   /// context on how the linking is made.
-  private func performGoogleAccountLink() {
-    guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+    private func performGoogleAccountLink() {
+        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+            // Create Google Sign In configuration object.
+            // TODO: Move configuration to Info.plist
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
 
-    // Create Google Sign In configuration object.
-    // TODO: Move configuration to Info.plist
-    let config = GIDConfiguration(clientID: clientID)
-    GIDSignIn.sharedInstance.configuration = config
+        GIDSignIn.sharedInstance.signIn(withPresenting: self) { [unowned self] result, error in
+            guard error == nil else { return displayError(error) }
 
-    // Start the sign in flow!
-    GIDSignIn.sharedInstance.signIn(withPresenting: self) { [unowned self] result, error in
+            guard
+              let user = result?.user,
+              let idToken = user.idToken?.tokenString
+            else {
+              let error = NSError(
+                domain: "GIDSignInError",
+                code: -1,
+                userInfo: [
+                  NSLocalizedDescriptionKey: "Unexpected sign in result: required authentication data is missing.",
+                ]
+              )
+              return displayError(error)
+            }
 
-      guard error == nil else { return displayError(error) }
-
-      guard
-        let user = result?.user,
-        let idToken = user.idToken?.tokenString
-      else {
-        let error = NSError(
-          domain: "GIDSignInError",
-          code: -1,
-          userInfo: [
-            NSLocalizedDescriptionKey: "Unexpected sign in result: required authentication data is missing.",
-          ]
-        )
-        return displayError(error)
-      }
-
-      let credential = GoogleAuthProvider.credential(withIDToken: idToken,
-                                                     accessToken: user.accessToken.tokenString)
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken,
+                                                           accessToken: user.accessToken.tokenString)
 
       // Rather than use the credential to sign in the user, we will use it to link to the currently signed in user's account.
-      linkAccount(authCredential: credential)
+            linkAccount(authCredential: credential)
+        }
     }
-  }
 
-  // MARK: - Sign in with Apple Account Linking 🔥
+    // MARK: - Sign in with Apple Account Linking 🔥
 
-  // For Sign in with Apple
-  var currentNonce: String?
+    // For Sign in with Apple
+    var currentNonce: String?
 
-  /// This method will initate the Sign In with Apple flow.
-  /// See this class's conformance to `ASAuthorizationControllerDelegate` below for
-  /// context on how the linking is made.
-  private func performAppleAccountLink() {
-    do {
-      let nonce = try CryptoUtils.randomNonceString()
-      currentNonce = nonce
-      let appleIDProvider = ASAuthorizationAppleIDProvider()
-      let request = appleIDProvider.createRequest()
-      request.requestedScopes = [.fullName, .email]
-      request.nonce = CryptoUtils.sha256(nonce)
+    /// This method will initate the Sign In with Apple flow.
+    /// See this class's conformance to `ASAuthorizationControllerDelegate` below for
+    /// context on how the linking is made.
+    private func performAppleAccountLink() {
+        do {
+            let nonce = try CryptoUtils.randomNonceString()
+            currentNonce = nonce
+            let appleIDProvider = ASAuthorizationAppleIDProvider()
+            let request = appleIDProvider.createRequest()
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = CryptoUtils.sha256(nonce)
 
-      let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-      authorizationController.delegate = self
-      authorizationController.presentationContextProvider = self
-      authorizationController.performRequests()
-    } catch {
-      // In the unlikely case that nonce generation fails, show error view.
-      displayError(error)
+            let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+            authorizationController.delegate = self
+            authorizationController.presentationContextProvider = self
+            authorizationController.performRequests()
+        } catch {
+                // In the unlikely case that nonce generation fails, show error view.
+            displayError(error)
+        }
     }
-  }
 
   // MARK: - Twitter, Microsoft, GitHub, Yahoo Account Linking 🔥
 

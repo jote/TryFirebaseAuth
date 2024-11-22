@@ -63,6 +63,7 @@
 		288831BB2CC3ACCB008488D1 /* FacebookLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 288831BA2CC3ACCB008488D1 /* FacebookLogin */; };
 		288831BD2CDB7EC9008488D1 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288831BC2CDB7EC9008488D1 /* Extensions.swift */; };
 		288831C22CDD8AC7008488D1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 288831C12CDD8AC7008488D1 /* GoogleService-Info.plist */; };
+		288831C42CEFF758008488D1 /* CryptoUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288831C32CEFF758008488D1 /* CryptoUtils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +85,7 @@
 		288831772CC1E23C008488D1 /* AccountLinkingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountLinkingViewController.swift; sourceTree = "<group>"; };
 		288831BC2CDB7EC9008488D1 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		288831C12CDD8AC7008488D1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		288831C32CEFF758008488D1 /* CryptoUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoUtils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,6 +195,7 @@
 			children = (
 				288831672C6CC40C008488D1 /* DataSourceProvider */,
 				288831BC2CDB7EC9008488D1 /* Extensions.swift */,
+				288831C32CEFF758008488D1 /* CryptoUtils.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -339,6 +342,7 @@
 				2881DC072C3E441B00BE2BC3 /* AppDelegate.swift in Sources */,
 				288831722CBBB372008488D1 /* SceneDelegate.swift in Sources */,
 				288831742CC1E0E5008488D1 /* OtherAuthMethods.swift in Sources */,
+				288831C42CEFF758008488D1 /* CryptoUtils.swift in Sources */,
 				2881DBF02C3E42C400BE2BC3 /* ContentView.swift in Sources */,
 				2888316B2C71DF5E008488D1 /* DataSourceProvider.swift in Sources */,
 				2888316E2CB3327F008488D1 /* AuthProvider.swift in Sources */,
