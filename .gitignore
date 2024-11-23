@@ -63,3 +63,4 @@ fastlane/test_output
 
 # Firebase configuration files
 GoogleService-Info.plist
+Facebook-info.plist

@@ -64,6 +64,7 @@
 		288831BD2CDB7EC9008488D1 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288831BC2CDB7EC9008488D1 /* Extensions.swift */; };
 		288831C22CDD8AC7008488D1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 288831C12CDD8AC7008488D1 /* GoogleService-Info.plist */; };
 		288831C42CEFF758008488D1 /* CryptoUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288831C32CEFF758008488D1 /* CryptoUtils.swift */; };
+		288831C62CF18709008488D1 /* Facebook-info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 288831C52CF18709008488D1 /* Facebook-info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +87,7 @@
 		288831BC2CDB7EC9008488D1 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		288831C12CDD8AC7008488D1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		288831C32CEFF758008488D1 /* CryptoUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CryptoUtils.swift; sourceTree = "<group>"; };
+		288831C52CF18709008488D1 /* Facebook-info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Facebook-info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +144,7 @@
 		2881DBE12C3E42C400BE2BC3 = {
 			isa = PBXGroup;
 			children = (
+				288831C52CF18709008488D1 /* Facebook-info.plist */,
 				288831C12CDD8AC7008488D1 /* GoogleService-Info.plist */,
 				2881DBEC2C3E42C400BE2BC3 /* TryFirebaseAuth */,
 				2881DBEB2C3E42C400BE2BC3 /* Products */,
@@ -325,6 +328,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				288831C62CF18709008488D1 /* Facebook-info.plist in Resources */,
 				2881DBF52C3E42C500BE2BC3 /* Preview Assets.xcassets in Resources */,
 				2881DBF22C3E42C500BE2BC3 /* Assets.xcassets in Resources */,
 				288831C22CDD8AC7008488D1 /* GoogleService-Info.plist in Resources */,

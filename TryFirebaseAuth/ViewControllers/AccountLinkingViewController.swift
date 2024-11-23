@@ -184,39 +184,39 @@ class AccountLinkingViewController: UIViewController, DataSourceProviderDelegate
             displayError(error)
         }
     }
+    // MARK: - Twitter, Microsoft, GitHub, Yahoo Account Linking 🔥
 
-  // MARK: - Twitter, Microsoft, GitHub, Yahoo Account Linking 🔥
+    /// Maintain a strong reference to an OAuthProvider for login
+    private var oauthProvider: OAuthProvider!
 
-  // Maintain a strong reference to an OAuthProvider for login
-  private var oauthProvider: OAuthProvider!
-
-  private func performOAuthAccountLink(for provider: AuthProvider) {
-    oauthProvider = OAuthProvider(providerID: provider.id)
-    oauthProvider.getCredentialWith(nil) { [weak self] credential, error in
-      guard let strongSelf = self else { return }
-      guard error == nil else { return strongSelf.displayError(error) }
-      guard let credential = credential else { return }
-      strongSelf.linkAccount(authCredential: credential)
+    private func performOAuthAccountLink(for provider: AuthProvider) {
+        oauthProvider = OAuthProvider(providerID: provider.id)
+        oauthProvider.getCredentialWith(nil) { [weak self] credential, error in
+            guard let self else { return }
+            guard error == nil else { return self.displayError(error) }
+            guard let credential = credential else { return }
+            self.linkAccount(authCredential: credential)
+        }
     }
-  }
 
-  // MARK: - Sign in with Facebook Account Linking 🔥
+    // MARK: - Sign in with Facebook Account Linking 🔥
 
-  private func performFacebookAccountLink() {
-    // The following config can also be stored in the project's .plist
-    Settings.shared.appID = "ENTER APP ID HERE"
-    Settings.shared.displayName = "AuthenticationExample"
-
-    // Create a Facebook `LoginManager` instance
-    let loginManager = LoginManager()
-    loginManager.logIn(permissions: ["email"], from: self) { [weak self] result, error in
-      guard let strongSelf = self else { return }
-      guard error == nil else { return strongSelf.displayError(error) }
-      guard let accessToken = AccessToken.current else { return }
-      let credential = FacebookAuthProvider.credential(withAccessToken: accessToken.tokenString)
-      strongSelf.linkAccount(authCredential: credential)
+    private func performFacebookAccountLink() {
+        // The following config can also be stored in the project's .plist
+        guard let path = Bundle.main.path(forResource: "Facebook-info", ofType: "plist"),
+           let facebookConfig = NSDictionary(contentsOfFile: path) as? [String: Any] else { return }
+        Settings.shared.appID = facebookConfig["FacebookAppID"] as? String
+        Settings.shared.displayName = facebookConfig["FacebookDisplayName"] as? String
+        // Create a Facebook `LoginManager` instance
+        let loginManager = LoginManager()
+        loginManager.logIn(permissions: ["email"], from: self) { [weak self] result, error in
+            guard let self else { return }
+            guard error == nil else { return self.displayError(error) }
+            guard let accessToken = AccessToken.current else { return }
+            let credential = FacebookAuthProvider.credential(withAccessToken: accessToken.tokenString)
+            self.linkAccount(authCredential: credential)
+        }
     }
-  }
 
   // MARK: - Email & Password Login Account Linking 🔥
 
