@@ -218,179 +218,174 @@ class AccountLinkingViewController: UIViewController, DataSourceProviderDelegate
         }
     }
 
-  // MARK: - Email & Password Login Account Linking 🔥
+    // MARK: - Email & Password Login Account Linking 🔥
 
-  private func performEmailPasswordAccountLink() {
-    presentEmailPasswordLinkAlertController { [weak self] email, password in
-      guard let strongSelf = self else { return }
-      let credential = EmailAuthProvider.credential(withEmail: email, password: password)
-      strongSelf.linkAccount(authCredential: credential)
-    }
-  }
-
-  // MARK: - Phone Number Account Linking 🔥
-
-  public func performPhoneNumberAccountLink() {
-    presentPhoneNumberAlertController { [weak self] phoneNumber in
-      let phoneNumber = String(format: "+%@", phoneNumber)
-      PhoneAuthProvider.provider()
-        .verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationID, error in
-          guard let strongSelf = self else { return }
-          guard error == nil else { return strongSelf.displayError(error) }
-          guard let verificationID = verificationID else { return }
-          strongSelf.presentPhoneLinkAlertController { verificationCode in
-            let credential = PhoneAuthProvider.provider()
-              .credential(withVerificationID: verificationID, verificationCode: verificationCode)
-            strongSelf.linkAccount(authCredential: credential)
-          }
+    private func performEmailPasswordAccountLink() {
+        presentEmailPasswordLinkAlertController { [weak self] email, password in
+            guard let self else { return }
+            let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+            self.linkAccount(authCredential: credential)
         }
     }
-  }
 
-  private func presentPhoneNumberAlertController(linkHandler: @escaping (String) -> Void) {
-    presentTextFieldAlertController(
-      title: "Link with Phone Auth",
-      message: "Example input for +1 (123)456-7890 would be 11234567890",
-      textfieldPlaceholder: "Enter a phone number.",
-      saveHandler: linkHandler
-    )
-  }
+    // MARK: - Phone Number Account Linking 🔥
 
-  private func presentPhoneLinkAlertController(saveHandler: @escaping (String) -> Void) {
-    presentTextFieldAlertController(
-      title: "Link with Phone Auth",
-      textfieldPlaceholder: "Enter verification code.",
-      saveHandler: saveHandler
-    )
-  }
-
-  // MARK: - Email Link/Passwordless Account Linking 🔥
-
-  /// Similar to in `PasswordlessViewController`, enter the authorized domain.
-  /// Please refer to this Quickstart's README for more information.
-  private let authorizedDomain: String = "ENTER AUTHORIZED DOMAIN"
-  /// Maintain a reference to the email entered for linking user to Passwordless.
-  private var email: String?
-
-  private func performPasswordlessAccountLink() {
-    presentPasswordlessAlertController { [weak self] email in
-      guard let strongSelf = self else { return }
-      strongSelf.sendSignInLink(to: email)
+    public func performPhoneNumberAccountLink() {
+        presentPhoneNumberAlertController { [weak self] phoneNumber in
+            let phoneNumber = String(format: "+%@", phoneNumber)
+            PhoneAuthProvider.provider()
+                .verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationID, error in
+                    guard let self else { return }
+                    guard error == nil else { return self.displayError(error) }
+                    guard let verificationID else { return }
+                    self.presentPhoneLinkAlertController { verificationCode in
+                        let credential = PhoneAuthProvider.provider()
+                            .credential(withVerificationID: verificationID, verificationCode: verificationCode)
+                        self.linkAccount(authCredential: credential)
+                    }
+                }
+        }
     }
-  }
 
-  private func presentPasswordlessAlertController(saveHandler: @escaping (String) -> Void) {
-    presentTextFieldAlertController(
-      title: "Link with Passwordless Login",
-      message: "Leave this view up while you check your email for the verification link.",
-      textfieldPlaceholder: "Enter a valid email address.",
-      saveHandler: saveHandler
-    )
-  }
-
-  private func sendSignInLink(to email: String) {
-    let actionCodeSettings = ActionCodeSettings()
-    let stringURL = "https://\(authorizedDomain).firebaseapp.com/login?email=\(email)"
-    actionCodeSettings.url = URL(string: stringURL)
-    // The sign-in operation must be completed in the app.
-    actionCodeSettings.handleCodeInApp = true
-    actionCodeSettings.setIOSBundleID(Bundle.main.bundleIdentifier!)
-
-    Auth.auth().sendSignInLink(toEmail: email, actionCodeSettings: actionCodeSettings) { error in
-      guard error == nil else { return self.displayError(error) }
-
-      // Set `email` property as it will be used to complete sign in after opening email link
-      self.email = email
+    private func presentPhoneNumberAlertController(linkHandler: @escaping (String) -> Void) {
+        presentTextFieldAlertController(
+            title: "Link with Phone Auth",
+            message: "Example input for +1 (123)456-7890 would be 11234567890",
+            textfieldPlaceholder: "Enter a phone number.",
+            saveHandler: linkHandler
+        )
     }
+
+    private func presentPhoneLinkAlertController(saveHandler: @escaping (String) -> Void) {
+        presentTextFieldAlertController(
+          title: "Link with Phone Auth",
+          textfieldPlaceholder: "Enter verification code.",
+          saveHandler: saveHandler
+        )
+    }
+
+    // MARK: - Email Link/Passwordless Account Linking 🔥
+
+    /// Similar to in `PasswordlessViewController`, enter the authorized domain.
+    /// Please refer to this Quickstart's README for more information.
+    private let authorizedDomain: String = "ENTER AUTHORIZED DOMAIN"
+    /// Maintain a reference to the email entered for linking user to Passwordless.
+    private var email: String?
+
+    private func performPasswordlessAccountLink() {
+        presentPasswordlessAlertController { [weak self] email in
+            guard let self else { return }
+            self.sendSignInLink(to: email)
+        }
+    }
+
+    private func presentPasswordlessAlertController(saveHandler: @escaping (String) -> Void) {
+        presentTextFieldAlertController(
+            title: "Link with Passwordless Login",
+            message: "Leave this view up while you check your email for the verification link.",
+            textfieldPlaceholder: "Enter a valid email address.",
+            saveHandler: saveHandler
+        )
   }
+
+    private func sendSignInLink(to email: String) {
+        let actionCodeSettings = ActionCodeSettings()
+        let stringURL = "https://\(authorizedDomain).firebaseapp.com/login?email=\(email)"
+        actionCodeSettings.url = URL(string: stringURL)
+        actionCodeSettings.handleCodeInApp = true
+        actionCodeSettings.setIOSBundleID(Bundle.main.bundleIdentifier!)
+
+        Auth.auth().sendSignInLink(toEmail: email, actionCodeSettings: actionCodeSettings) { error in
+            guard error == nil else { return self.displayError(error) }
+            // Set `email` property as it will be used to complete sign in after opening email link
+            self.email = email
+        }
+    }
 
   @objc
-  private func passwordlessSignIn() {
-    // Retrieve link that we stored in user defaults in `SceneDelegate`.
-    guard let email = email,
-      let link = UserDefaults.standard.value(forKey: "Link") as? String else { return }
-    let credential = EmailAuthProvider.credential(withEmail: email, link: link)
-    linkAccount(authCredential: credential)
-    self.email = nil
-  }
+    private func passwordlessSignIn() {
+        guard let email = email,
+              let link = UserDefaults.standard.value(forKey: "Link") as? String
+        else { return }
+        let credential = EmailAuthProvider.credential(withEmail: email, link: link)
+        linkAccount(authCredential: credential)
+        self.email = nil
+    }
 
-  private func registerForLoginNotifications() {
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(passwordlessSignIn),
-      name: Notification.Name("PasswordlessEmailNotificationSuccess"),
-      object: nil
-    )
-  }
+    private func registerForLoginNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(passwordlessSignIn),
+            name: Notification.Name("PasswordlessEmailNotificationSuccess"),
+            object: nil
+        )
+    }
 
-  // MARK: - UI Configuration
+    // MARK: - UI Configuration
 
-  private func configureNavigationBar() {
-    navigationItem.title = "Account Linking"
-    navigationItem.backBarButtonItem?.tintColor = .systemYellow
-    navigationController?.navigationBar.prefersLargeTitles = true
-  }
+    private func configureNavigationBar() {
+        navigationItem.title = "Account Linking"
+        navigationItem.backBarButtonItem?.tintColor = .systemYellow
+        navigationController?.navigationBar.prefersLargeTitles = true
+    }
 
-  private func presentTextFieldAlertController(title: String? = nil,
-                                               message: String? = nil,
-                                               textfieldPlaceholder: String? = nil,
-                                               saveHandler: @escaping (String) -> Void) {
-    let textFieldAlertController = UIAlertController(
-      title: title,
-      message: message,
-      preferredStyle: .alert
-    )
-      
-      textFieldAlertController.addTextField { textfield in
-          textfield.placeholder = textfieldPlaceholder
-          textfield.textContentType = .oneTimeCode
-      }
-      
-      let onContinue: (UIAlertAction) -> Void = { _ in
-          let text = textFieldAlertController.textFields!.first!.text!
-          saveHandler(text)
-      }
-      
-      textFieldAlertController.addAction(
-        UIAlertAction(title: "Continue", style: .default, handler: onContinue)
-      )
-      
-      textFieldAlertController.addAction(
-        UIAlertAction(title: "Cancel", style: .cancel)
-      )
-      
-      present(textFieldAlertController, animated: true, completion: nil)
-  }
-    
-    private func presentEmailPasswordLinkAlertController(linkHandler: @escaping (String, String)
-                                                         -> Void) {
-        let loginAlertController = UIAlertController(
-            title: "Link Password Auth",
-            message: "Enter a valid email and password to link",
+    private func presentTextFieldAlertController(title: String? = nil,
+                                                 message: String? = nil,
+                                                 textfieldPlaceholder: String? = nil,
+                                                 saveHandler: @escaping (String) -> Void) {
+        let textFieldAlertController = UIAlertController(
+            title: title,
+            message: message,
             preferredStyle: .alert
         )
-        
+        textFieldAlertController.addTextField { textfield in
+            textfield.placeholder = textfieldPlaceholder
+            textfield.textContentType = .oneTimeCode
+        }
+        let onContinue: (UIAlertAction) -> Void = { _ in
+            let text = textFieldAlertController.textFields!.first!.text!
+            saveHandler(text)
+        }
+        textFieldAlertController.addAction(
+            UIAlertAction(title: "Continue", style: .default, handler: onContinue)
+        )
+        textFieldAlertController.addAction(
+            UIAlertAction(title: "Cancel", style: .cancel)
+        )
+        present(textFieldAlertController, animated: true, completion: nil)
+    }
+
+    private func presentEmailPasswordLinkAlertController(linkHandler: @escaping (String, String) -> Void) {
+        let loginAlertController = UIAlertController(
+            title: "Link Password Auth",
+            message: "Enter a valid email and passord to link",
+            preferredStyle: .alert
+        )
         ["Email", "Password"].forEach { placeholder in
             loginAlertController.addTextField { textfield in
                 textfield.placeholder = placeholder
             }
         }
-        
         let onContinue: (UIAlertAction) -> Void = { _ in
             let email = loginAlertController.textFields![0].text!
             let password = loginAlertController.textFields![1].text!
             linkHandler(email, password)
         }
-        
-        loginAlertController
-            .addAction(UIAlertAction(title: "Continue", style: .default, handler: onContinue))
-        loginAlertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        
+        loginAlertController.addAction(
+            UIAlertAction(
+                title: "Contine",
+                style: .default,
+                handler: onContinue
+            )
+        )
+        loginAlertController.addAction(
+            UIAlertAction(title: "Cancel", style: .cancel)
+        )
         present(loginAlertController, animated: true, completion: nil)
     }
-    
-        // MARK: - TableView Configuration & Refresh
-    
+
+    // MARK: - TableView Configuration & Refresh
+
     private func configureDataSourceProvider() {
         dataSourceProvider = DataSourceProvider(
             dataSource: sections,
